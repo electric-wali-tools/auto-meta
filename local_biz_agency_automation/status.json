@@ -1,0 +1,9 @@
+{
+  "is_running": true,
+  "start_hour": 10,
+  "end_hour": 18,
+  "total_scraped": 14,
+  "sites_published": 14,
+  "pitches_sent": 14,
+  "hot_leads": 3
+}

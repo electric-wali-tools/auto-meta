@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agency AI Automation Dashboard & Lead CRM</title>
+    <!-- TailwindCSS & Chart.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-sky-500/20 p-2.5 rounded-xl border border-sky-500/30 text-sky-400">
+                    <i class="fa-solid fa-robot text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Local Biz Lead Automation Agent</h1>
+                    <p class="text-xs text-slate-400">Configured for Manish (<span class="text-sky-400 font-semibold">{manish_phone}</span>)</p>
+                </div>
+            </div>
+
+            <!-- Controls & Status Badge -->
+            <div class="flex items-center gap-4">
+                <div id="statusBadge" class="px-4 py-1.5 rounded-full font-bold text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    Checking Status...
+                </div>
+                <button id="toggleBtn" onclick="toggleEngine()" class="px-5 py-2 rounded-xl font-bold text-xs text-white transition shadow-lg bg-emerald-600 hover:bg-emerald-500">
+                    MASTER POWER
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+        <!-- Agent Quick Action Control Buttons -->
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-sm uppercase tracking-wider font-bold text-slate-400 flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-yellow-500"></i> Autonomous Agent Manual Triggers
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button onclick="triggerAction('scan')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-4 rounded-xl text-left transition flex items-center gap-4">
+                    <div class="bg-sky-500/20 text-sky-400 p-3 rounded-lg"><i class="fa-solid fa-magnifying-glass text-xl"></i></div>
+                    <div>
+                        <div class="font-bold text-sm text-slate-200">1. Run Lead Scanner</div>
+                        <div class="text-xs text-slate-400">Find businesses with missing sites</div>
+                    </div>
+                </button>
+                <button onclick="triggerAction('build')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-4 rounded-xl text-left transition flex items-center gap-4">
+                    <div class="bg-indigo-500/20 text-indigo-400 p-3 rounded-lg"><i class="fa-solid fa-code text-xl"></i></div>
+                    <div>
+                        <div class="font-bold text-sm text-slate-200">2. Build & Deploy Demos</div>
+                        <div class="text-xs text-slate-400">Publish custom sites to GitHub</div>
+                    </div>
+                </button>
+                <button onclick="triggerAction('pitch')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-4 rounded-xl text-left transition flex items-center gap-4">
+                    <div class="bg-emerald-500/20 text-emerald-400 p-3 rounded-lg"><i class="fa-solid fa-paper-plane text-xl"></i></div>
+                    <div>
+                        <div class="font-bold text-sm text-slate-200">3. Send Market Pitches</div>
+                        <div class="text-xs text-slate-400">Outreach Market Gap & Scope</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metrics Overview Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <div class="text-slate-400 text-xs font-semibold">Total Scraped</div>
+                <div id="statLeads" class="text-2xl font-black text-slate-100 mt-1">0</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <div class="text-slate-400 text-xs font-semibold">Live Demo Sites</div>
+                <div id="statSites" class="text-2xl font-black text-sky-400 mt-1">0</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <div class="text-slate-400 text-xs font-semibold">Pitches Sent</div>
+                <div id="statPitches" class="text-2xl font-black text-indigo-400 mt-1">0</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <div class="text-slate-400 text-xs font-semibold">Hot Leads</div>
+                <div id="statHotLeads" class="text-2xl font-black text-amber-400 mt-1">0</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                <div class="text-slate-400 text-xs font-semibold">Closed Deals (Est.)</div>
+                <div id="statRevenue" class="text-2xl font-black text-emerald-400 mt-1">₹0</div>
+            </div>
+        </div>
+
+        <!-- Analytics Charts (Weekly & Monthly) -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                <h3 class="font-bold text-sm text-slate-300 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-simple text-sky-400"></i> Weekly Lead Pipeline Performance
+                </h3>
+                <div class="h-56">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                <h3 class="font-bold text-sm text-slate-300 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-emerald-400"></i> Monthly Deal Closures & Revenue Growth
+                </h3>
+                <div class="h-56">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Lead CRM Table -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden space-y-4 p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-100">Client Lead Records & Status CRM</h3>
+                    <p class="text-xs text-slate-400">Manage all target leads, demo URLs, and status hand-offs</p>
+                </div>
+
+                <!-- Filter & Search -->
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <input type="text" id="searchInput" oninput="fetchLeads()" placeholder="Search Business, City, Category..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 w-full sm:w-64">
+                    <select id="statusFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                        <option value="ALL">All Statuses</option>
+                        <option value="NEW">New Scraped</option>
+                        <option value="DEMO_READY">Demo Published</option>
+                        <option value="PITCHED">Pitched</option>
+                        <option value="HOT_LEAD">🔥 Hot Lead</option>
+                        <option value="CLOSED_DEAL">✅ Closed Deal</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">Business Name & Category</th>
+                            <th class="p-3">Location & Rating</th>
+                            <th class="p-3">Phone Number</th>
+                            <th class="p-3">Demo Website URL</th>
+                            <th class="p-3">Status</th>
+                            <th class="p-3 text-right">Quick Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody" class="divide-y divide-slate-800/50">
+                        <!-- Dynamic Rows loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let weeklyChartInstance = null;
+        let monthlyChartInstance = null;
+
+        async function fetchDashboard() {
+            const res = await fetch('/api/dashboard');
+            const data = await res.json();
+
+            // Status Badge
+            const badge = document.getElementById('statusBadge');
+            badge.innerText = data.status.system_state;
+
+            const btn = document.getElementById('toggleBtn');
+            if (data.status.is_running) {
+                btn.innerText = 'POWER OFF';
+                btn.className = 'px-5 py-2 rounded-xl font-bold text-xs text-white transition shadow-lg bg-rose-600 hover:bg-rose-500';
+            } else {
+                btn.innerText = 'POWER ON';
+                btn.className = 'px-5 py-2 rounded-xl font-bold text-xs text-white transition shadow-lg bg-emerald-600 hover:bg-emerald-500';
+            }
+
+            // Metrics
+            document.getElementById('statLeads').innerText = data.metrics.total_leads;
+            document.getElementById('statSites').innerText = data.metrics.sites_published;
+            document.getElementById('statPitches').innerText = data.metrics.pitches_sent;
+            document.getElementById('statHotLeads').innerText = data.metrics.hot_leads;
+            document.getElementById('statRevenue').innerText = '₹' + data.metrics.estimated_revenue.toLocaleString('en-IN');
+
+            // Render Charts
+            renderCharts(data.weekly_analytics, data.monthly_analytics);
+        }
+
+        async function fetchLeads() {
+            const status = document.getElementById('statusFilter').value;
+            const search = document.getElementById('searchInput').value;
+            const res = await fetch(`/api/leads?status=${status}&search=${encodeURIComponent(search)}`);
+            const data = await res.json();
+
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '';
+
+            if (data.leads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No leads found matching criteria.</td></tr>`;
+                return;
+            }
+
+            data.leads.forEach(lead => {
+                let badgeClass = 'bg-slate-800 text-slate-300';
+                if (lead.status === 'HOT_LEAD') badgeClass = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                if (lead.status === 'CLOSED_DEAL') badgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                if (lead.status === 'DEMO_READY') badgeClass = 'bg-sky-500/20 text-sky-400 border border-sky-500/30';
+
+                const cleanPhone = (lead.phone || '').replace(/\D/g, '');
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-900/60 transition">
+                        <td class="p-3">
+                            <div class="font-bold text-slate-100 text-sm">${lead.name}</div>
+                            <div class="text-slate-400 text-xs">${lead.category}</div>
+                        </td>
+                        <td class="p-3">
+                            <div class="text-slate-300">${lead.city}</div>
+                            <div class="text-amber-400 text-xs">⭐ ${lead.rating} (${lead.reviews} reviews)</div>
+                        </td>
+                        <td class="p-3 font-mono text-slate-200">${lead.phone || 'N/A'}</td>
+                        <td class="p-3">
+                            ${lead.demo_url ? `<a href="${lead.demo_url}" target="_blank" class="text-sky-400 hover:underline flex items-center gap-1 font-semibold"><i class="fa-solid fa-external-link"></i> Live Demo</a>` : `<span class="text-slate-600">Pending</span>`}
+                        </td>
+                        <td class="p-3">
+                            <select onchange="updateLeadStatus(${lead.id}, this.value)" class="px-2 py-1 rounded text-xs font-bold border ${badgeClass}">
+                                <option value="NEW" ${lead.status === 'NEW' ? 'selected' : ''}>NEW</option>
+                                <option value="DEMO_READY" ${lead.status === 'DEMO_READY' ? 'selected' : ''}>DEMO_READY</option>
+                                <option value="PITCHED" ${lead.status === 'PITCHED' ? 'selected' : ''}>PITCHED</option>
+                                <option value="HOT_LEAD" ${lead.status === 'HOT_LEAD' ? 'selected' : ''}>🔥 HOT LEAD</option>
+                                <option value="CLOSED_DEAL" ${lead.status === 'CLOSED_DEAL' ? 'selected' : ''}>✅ CLOSED DEAL</option>
+                            </select>
+                        </td>
+                        <td class="p-3 text-right">
+                            <a href="https://wa.me/${cleanPhone}?text=Namaste%20${encodeURIComponent(lead.name)}%20ji" target="_blank" class="bg-green-600 hover:bg-green-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1">
+                                <i class="fa-brands fa-whatsapp"></i> Chat
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function updateLeadStatus(id, newStatus) {
+            await fetch(`/api/leads/${id}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            fetchDashboard();
+        }
+
+        async function toggleEngine() {
+            await fetch('/api/agent/toggle', { method: 'POST' });
+            fetchDashboard();
+        }
+
+        async function triggerAction(action) {
+            const res = await fetch(`/api/agent/trigger/${action}`, { method: 'POST' });
+            const data = await res.json();
+            alert(data.message || 'Action executed!');
+            fetchDashboard();
+            fetchLeads();
+        }
+
+        function renderCharts(weekly, monthly) {
+            const ctx1 = document.getElementById('weeklyChart').getContext('2d');
+            if (weeklyChartInstance) weeklyChartInstance.destroy();
+            weeklyChartInstance = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: weekly.labels,
+                    datasets: [
+                        { label: 'Scraped', data: weekly.scraped, backgroundColor: '#38bdf8' },
+                        { label: 'Demo Sites', data: weekly.published, backgroundColor: '#818cf8' },
+                        { label: 'Hot Leads', data: weekly.hot_leads, backgroundColor: '#f59e0b' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+            });
+
+            const ctx2 = document.getElementById('monthlyChart').getContext('2d');
+            if (monthlyChartInstance) monthlyChartInstance.destroy();
+            monthlyChartInstance = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: monthly.labels,
+                    datasets: [
+                        { label: 'Closed Deals', data: monthly.closed, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+            });
+        }
+
+        fetchDashboard();
+        fetchLeads();
+        setInterval(fetchDashboard, 5000);
+    </script>
+</body>
+</html>
